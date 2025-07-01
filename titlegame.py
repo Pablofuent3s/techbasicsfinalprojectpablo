@@ -51,7 +51,7 @@ class Player:
     def __init__(self, x, y, size):
         self.rect = pygame.Rect(x, y, size, size)
         # Player speed, adjusted to fit maze scale
-        self.speed = 4
+        self.speed = 2
 
     def move(self, keys, walls):
         """
