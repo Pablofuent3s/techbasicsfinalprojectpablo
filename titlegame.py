@@ -6,6 +6,10 @@ import sys
 from pygame import mixer #(sound effects)
 
 pygame.init()
+mixer.init()
+# Loading the audio file
+pygame.mixer.Sound ("media/collision.mp3")
+collision = pygame.mixer.Sound("media/collision.mp3")
 
 # Window settings
 WIDTH, HEIGHT = 640, 480
@@ -72,14 +76,15 @@ class Player:
         self.rect.x += dx
         for wall in walls:
             if self.rect.colliderect(wall.rect):
+                mixer.Sound.play(collision)
                 self.rect.x = original_x  # Revert x movement if collision detected
-                # TODO: play the collision sound
                 break
 
         # Attempt to move vertically and check for collisions
         self.rect.y += dy
         for wall in walls:
             if self.rect.colliderect(wall.rect):
+                mixer.Sound.play(collision)
                 self.rect.y = original_y  # Revert y movement if collision detected
                 break
 
@@ -194,7 +199,6 @@ class Game:
     def __init__(self):
         self.clock = pygame.time.Clock()
         self.running = True
-# TODO: Load collision sound effects
         # 1. Generate the logical maze grid using the algorithm
         self.maze_grid = generate_maze_recursive_backtracking(MAZE_ROWS, MAZE_COLS)
         # 2. Convert the logical grid into physical Pygame Wall objects
