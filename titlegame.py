@@ -3,6 +3,7 @@
 import pygame
 import random
 import sys
+from pygame import mixer #(sound effects)
 
 pygame.init()
 
@@ -72,6 +73,7 @@ class Player:
         for wall in walls:
             if self.rect.colliderect(wall.rect):
                 self.rect.x = original_x  # Revert x movement if collision detected
+                # TODO: play the collision sound
                 break
 
         # Attempt to move vertically and check for collisions
@@ -192,7 +194,7 @@ class Game:
     def __init__(self):
         self.clock = pygame.time.Clock()
         self.running = True
-
+# TODO: Load collision sound effects
         # 1. Generate the logical maze grid using the algorithm
         self.maze_grid = generate_maze_recursive_backtracking(MAZE_ROWS, MAZE_COLS)
         # 2. Convert the logical grid into physical Pygame Wall objects
