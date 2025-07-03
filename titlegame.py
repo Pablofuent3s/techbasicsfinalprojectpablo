@@ -7,10 +7,11 @@ from pygame import mixer #(sound effects)
 
 pygame.init()
 mixer.init()
-# Loading the audio file
+# Loading audio files
 pygame.mixer.Sound ("media/collision.mp3")
+pygame.mixer.Sound ("media/sound_effect_levelpass.mp3")
 collision = pygame.mixer.Sound("media/collision.mp3")
-
+levelpass = pygame.mixer.Sound("media/sound_effect_levelpass.mp3")
 # Window settings
 WIDTH, HEIGHT = 640, 480
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -196,24 +197,6 @@ def generate_maze_recursive_backtracking(rows, cols):
 class Game:
     """Main game class to manage game state, logic, and rendering."""
 
-    def __init__(self):
-        self.clock = pygame.time.Clock()
-        self.running = True
-        # 1. Generate the logical maze grid using the algorithm
-        self.maze_grid = generate_maze_recursive_backtracking(MAZE_ROWS, MAZE_COLS)
-        # 2. Convert the logical grid into physical Pygame Wall objects
-        self.walls = self.convert_grid_to_pygame_walls(self.maze_grid)
-
-        # Player starting position: centered within the top-left cell (0,0)
-        player_start_x = CELL_SIZE // 2 - (PLAYER_SIZE // 2)
-        player_start_y = CELL_SIZE // 2 - (PLAYER_SIZE // 2)
-        self.player = Player(player_start_x, player_start_y, PLAYER_SIZE)
-
-        # Goal position: centered within the bottom-right cell (MAZE_COLS-1, MAZE_ROWS-1)
-        goal_x = (MAZE_COLS - 1) * CELL_SIZE + (CELL_SIZE // 2 - (GOAL_SIZE // 2))
-        goal_y = (MAZE_ROWS - 1) * CELL_SIZE + (CELL_SIZE // 2 - (GOAL_SIZE // 2))
-        self.goal = Goal(goal_x, goal_y, GOAL_SIZE, GOAL_SIZE)
-
     def convert_grid_to_pygame_walls(self, grid):
         """
         Converts the logical maze grid (composed of Cell objects) into a list
@@ -223,73 +206,89 @@ class Game:
         pygame_walls = []
 
         # Add the outer border walls for the entire game window
-        # Top border
-        pygame_walls.append(Wall(0, 0, WIDTH, WALL_THICKNESS))
-        # Bottom border
-        pygame_walls.append(Wall(0, HEIGHT - WALL_THICKNESS, WIDTH, WALL_THICKNESS))
-        # Left border
-        pygame_walls.append(Wall(0, 0, WALL_THICKNESS, HEIGHT))
-        # Right border
-        pygame_walls.append(Wall(WIDTH - WALL_THICKNESS, 0, WALL_THICKNESS, HEIGHT))
+        pygame_walls.append(Wall(0, 0, WIDTH, WALL_THICKNESS))  # Top border
+        pygame_walls.append(Wall(0, HEIGHT - WALL_THICKNESS, WIDTH, WALL_THICKNESS))  # Bottom border
+        pygame_walls.append(Wall(0, 0, WALL_THICKNESS, HEIGHT))  # Left border
+        pygame_walls.append(Wall(WIDTH - WALL_THICKNESS, 0, WALL_THICKNESS, HEIGHT))  # Right border
 
-        # Iterate through each cell in the grid to add its existing internal walls
         for y, row in enumerate(grid):
             for x, cell in enumerate(row):
-                # Calculate the top-left pixel coordinates for the current cell
-                cell_pixel_x = x * CELL_SIZE
-                cell_pixel_y = y * CELL_SIZE
+                cell_x = x * CELL_SIZE
+                cell_y = y * CELL_SIZE
 
-                # If the East wall of the current cell exists, add it to our list of Pygame walls.
-                # The wall is drawn at the right edge of the current cell, extending slightly
-                # to ensure smooth connections at corners.
                 if cell.walls['E']:
-                    pygame_walls.append(Wall(cell_pixel_x + CELL_SIZE - WALL_THICKNESS,
-                                             cell_pixel_y,
-                                             WALL_THICKNESS,
-                                             CELL_SIZE + WALL_THICKNESS))
+                    pygame_walls.append(Wall(
+                        cell_x + CELL_SIZE - WALL_THICKNESS,
+                        cell_y,
+                        WALL_THICKNESS,
+                        CELL_SIZE + WALL_THICKNESS
+                    ))
 
-                # If the South wall of the current cell exists, add it to our list of Pygame walls.
-                # The wall is drawn at the bottom edge of the current cell, extending slightly
-                # to ensure smooth connections at corners.
                 if cell.walls['S']:
-                    pygame_walls.append(Wall(cell_pixel_x,
-                                             cell_pixel_y + CELL_SIZE - WALL_THICKNESS,
-                                             CELL_SIZE + WALL_THICKNESS,
-                                             WALL_THICKNESS))
+                    pygame_walls.append(Wall(
+                        cell_x,
+                        cell_y + CELL_SIZE - WALL_THICKNESS,
+                        CELL_SIZE + WALL_THICKNESS,
+                        WALL_THICKNESS
+                    ))
 
         return pygame_walls
+    def __init__(self):
+        self.clock = pygame.time.Clock()
+        self.running = True
+        self.level = 1
+        self.max_levels = 3
+
+        # Initial maze and game elements
+        self.generate_new_maze()
+
+    def generate_new_maze(self):
+        """Generates a new maze and updates walls, player, and goal."""
+        self.maze_grid = generate_maze_recursive_backtracking(MAZE_ROWS, MAZE_COLS)
+        self.walls = self.convert_grid_to_pygame_walls(self.maze_grid)
+
+        # Player starts at top-left
+        player_start_x = CELL_SIZE // 2 - (PLAYER_SIZE // 2)
+        player_start_y = CELL_SIZE // 2 - (PLAYER_SIZE // 2)
+        self.player = Player(player_start_x, player_start_y, PLAYER_SIZE)
+
+        # Goal at bottom-right
+        goal_x = (MAZE_COLS - 1) * CELL_SIZE + (CELL_SIZE // 2 - (GOAL_SIZE // 2))
+        goal_y = (MAZE_ROWS - 1) * CELL_SIZE + (CELL_SIZE // 2 - (GOAL_SIZE // 2))
+        self.goal = Goal(goal_x, goal_y, GOAL_SIZE, GOAL_SIZE)
 
     def run(self):
         """Starts and manages the main game loop."""
         while self.running:
-            self.clock.tick(60)  # Limits the game to 60 frames per second
-            WIN.fill(WHITE)  # Fills the entire window with white to clear previous frame
+            self.clock.tick(60)
+            WIN.fill(WHITE)
 
-            # Event handling loop (e.g., quitting the game)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    self.running = False  # Set running to False to exit the game loop
+                    self.running = False
 
-            # Get the state of all keyboard keys
             keys = pygame.key.get_pressed()
-            # Move the player based on key presses and check for wall collisions
             self.player.move(keys, self.walls)
-
-            # Draw all game elements onto the window surface
+            # Win conditions
             for wall in self.walls:
                 wall.draw(WIN)
             self.goal.draw(WIN)
             self.player.draw(WIN)
 
-            # Check for win condition: if the player's rectangle overlaps with the goal's rectangle
             if self.player.rect.colliderect(self.goal.rect):
-                print("¡You won!")  # Print win message to console
-                self.running = False  # End the game
+                levelpass.play()
+                pygame.time.delay(500)
+            # Level passing
+                if self.level < self.max_levels:
+                    self.level += 1
+                    print(f"Level {self.level - 1} complete. Loading next level...")
+                    self.generate_new_maze()
+                else:
+                    print("🎉 Congratulations! You completed all levels.")
+                    self.running = False
 
-            # Update the entire screen to display what has been drawn
             pygame.display.update()
 
-        # After the game loop ends, exit the program
         pygame.quit()
         sys.exit()
 
