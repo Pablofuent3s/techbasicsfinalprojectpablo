@@ -196,6 +196,15 @@ def generate_maze_recursive_backtracking(rows, cols):
 
 class Game:
     """Main game class to manage game state, logic, and rendering."""
+    def __init__(self):
+        self.clock = pygame.time.Clock()
+        self.running = True
+        self.level = 1
+        self.max_levels = 3
+        self.font = pygame.font.SysFont(None, 36)
+        self.title_font = pygame.font.SysFont(None, 48)
+        # Initial maze and game elements
+        self.generate_new_maze()
 
     def convert_grid_to_pygame_walls(self, grid):
         """
@@ -233,14 +242,6 @@ class Game:
                     ))
 
         return pygame_walls
-    def __init__(self):
-        self.clock = pygame.time.Clock()
-        self.running = True
-        self.level = 1
-        self.max_levels = 3
-
-        # Initial maze and game elements
-        self.generate_new_maze()
 
     def generate_new_maze(self):
         """Generates a new maze and updates walls, player, and goal."""
@@ -257,8 +258,57 @@ class Game:
         goal_y = (MAZE_ROWS - 1) * CELL_SIZE + (CELL_SIZE // 2 - (GOAL_SIZE // 2))
         self.goal = Goal(goal_x, goal_y, GOAL_SIZE, GOAL_SIZE)
 
+    def show_start_screen(self):
+        """Displays an intro screen with instructions."""
+        WIN.fill(WHITE)
+        title = self.title_font.render("Maze Navigator", True, BLACK)
+        instructions1 = self.font.render("Use the arrow keys to move the blue square.", True, BLACK)
+        instructions2 = self.font.render("Get to the green square to pass the level.", True, BLACK)
+        instructions3 = self.font.render("You need to complete three levels to win.", True, BLACK)
+        start_msg = self.font.render("Press any key to continue...", True, BLUE)
+
+        WIN.blit(title, (WIDTH // 2 - title.get_width() // 2, 80))
+        WIN.blit(instructions1, (WIDTH // 2 - instructions1.get_width() // 2, 160))
+        WIN.blit(instructions2, (WIDTH // 2 - instructions2.get_width() // 2, 200))
+        WIN.blit(instructions3, (WIDTH // 2 - instructions3.get_width() // 2, 240))
+        WIN.blit(start_msg, (WIDTH // 2 - start_msg.get_width() // 2, 320))
+
+        pygame.display.update()
+
+        # Wait for any key press
+        waiting = True
+        while waiting:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    waiting = False
+
+    def show_victory_screen(self):
+        """Displays a victory message after all levels are completed."""
+        WIN.fill(WHITE)
+        victory = self.title_font.render("¡Congrats!", True, GREEN)
+        message = self.font.render("You passed all the levels.", True, BLACK)
+        exit_msg = self.font.render("Close the window to exit the game.", True, BLUE)
+
+        WIN.blit(victory, (WIDTH // 2 - victory.get_width() // 2, 140))
+        WIN.blit(message, (WIDTH // 2 - message.get_width() // 2, 200))
+        WIN.blit(exit_msg, (WIDTH // 2 - exit_msg.get_width() // 2, 280))
+
+        pygame.display.update()
+
+        # Wait until window is closed
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
     def run(self):
         """Starts and manages the main game loop."""
+        self.show_start_screen()
+
         while self.running:
             self.clock.tick(60)
             WIN.fill(WHITE)
@@ -269,7 +319,7 @@ class Game:
 
             keys = pygame.key.get_pressed()
             self.player.move(keys, self.walls)
-            # Win conditions
+
             for wall in self.walls:
                 wall.draw(WIN)
             self.goal.draw(WIN)
@@ -278,14 +328,12 @@ class Game:
             if self.player.rect.colliderect(self.goal.rect):
                 levelpass.play()
                 pygame.time.delay(500)
-            # Level passing
+
                 if self.level < self.max_levels:
                     self.level += 1
-                    print(f"Level {self.level - 1} complete. Loading next level...")
                     self.generate_new_maze()
                 else:
-                    print("🎉 Congratulations! You completed all levels.")
-                    self.running = False
+                    self.show_victory_screen()
 
             pygame.display.update()
 
