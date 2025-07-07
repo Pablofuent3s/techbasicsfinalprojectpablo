@@ -58,7 +58,7 @@ class Player:
         # Player speed, adjusted to fit maze scale
         self.speed = 2
 
-    def move(self, keys, walls):
+    def move(self, keys, walls, game):
         """
         Moves the player based on key presses (arrow keys) and checks for collisions with walls.
         Collision detection is handled by attempting a move, then reverting if a collision occurs.
@@ -79,6 +79,7 @@ class Player:
             if self.rect.colliderect(wall.rect):
                 mixer.Sound.play(collision)
                 self.rect.x = original_x  # Revert x movement if collision detected
+                game.collisions += 1  # Count collision
                 break
 
         # Attempt to move vertically and check for collisions
@@ -87,6 +88,7 @@ class Player:
             if self.rect.colliderect(wall.rect):
                 mixer.Sound.play(collision)
                 self.rect.y = original_y  # Revert y movement if collision detected
+                game.collisions += 1  # Count collision
                 break
 
     def draw(self, surface):
@@ -203,6 +205,8 @@ class Game:
         self.max_levels = 3
         self.font = pygame.font.SysFont(None, 36)
         self.title_font = pygame.font.SysFont(None, 48)
+        self.collisions = 0
+        self.start_time = pygame.time.get_ticks()  # In milliseconds
         # Initial maze and game elements
         self.generate_new_maze()
 
@@ -288,13 +292,19 @@ class Game:
     def show_victory_screen(self):
         """Displays a victory message after all levels are completed."""
         WIN.fill(WHITE)
-        victory = self.title_font.render("¡Congrats!", True, GREEN)
-        message = self.font.render("You passed all the levels.", True, BLACK)
+        total_time = (pygame.time.get_ticks() - self.start_time) // 1000
+
+        victory = self.title_font.render("Congrats!", True, GREEN)
+        message = self.font.render("You completed all the levels.", True, BLACK)
+        time_msg = self.font.render(f"Total time: {total_time} s", True, BLACK)
+        coll_msg = self.font.render(f"Time stuck in a wall: {self.collisions} ms", True, BLACK)
         exit_msg = self.font.render("Close the window to exit the game.", True, BLUE)
 
-        WIN.blit(victory, (WIDTH // 2 - victory.get_width() // 2, 140))
-        WIN.blit(message, (WIDTH // 2 - message.get_width() // 2, 200))
-        WIN.blit(exit_msg, (WIDTH // 2 - exit_msg.get_width() // 2, 280))
+        WIN.blit(victory, (WIDTH // 2 - victory.get_width() // 2, 100))
+        WIN.blit(message, (WIDTH // 2 - message.get_width() // 2, 160))
+        WIN.blit(time_msg, (WIDTH // 2 - time_msg.get_width() // 2, 200))
+        WIN.blit(coll_msg, (WIDTH // 2 - coll_msg.get_width() // 2, 240))
+        WIN.blit(exit_msg, (WIDTH // 2 - exit_msg.get_width() // 2, 300))
 
         pygame.display.update()
 
@@ -318,7 +328,7 @@ class Game:
                     self.running = False
 
             keys = pygame.key.get_pressed()
-            self.player.move(keys, self.walls)
+            self.player.move(keys, self.walls, self)
 
             for wall in self.walls:
                 wall.draw(WIN)
@@ -334,11 +344,19 @@ class Game:
                     self.generate_new_maze()
                 else:
                     self.show_victory_screen()
-
+            # Display collision count and timer
+            elapsed_time = (pygame.time.get_ticks() - self.start_time) // 1000  # in seconds
+            timer_text = self.font.render(f"Time: {elapsed_time}s", True, BLACK)
+            collision_text = self.font.render(f"Collision time: {self.collisions} ms", True, BLACK)
+            WIN.blit(timer_text, (10, 10))
+            WIN.blit(collision_text, (10, 40))
             pygame.display.update()
 
-        pygame.quit()
-        sys.exit()
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
 
 
 if __name__ == "__main__":
