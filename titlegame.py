@@ -15,7 +15,7 @@ levelpass = pygame.mixer.Sound("media/sound_effect_levelpass.mp3")
 # Window settings
 WIDTH, HEIGHT = 640, 480
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Maze Navigator")
+pygame.display.set_caption("Reflex Driving")
 
 # Colors
 WHITE = (255, 255, 255)
@@ -287,7 +287,7 @@ class Game:
     def show_start_screen(self):
         """Displays an intro screen with instructions."""
         WIN.fill(WHITE)
-        title = self.title_font.render("Maze Navigator", True, BLACK)
+        title = self.title_font.render("Reflex Driving", True, BLACK)
         instructions1 = self.font.render("Test your reflexes with this pygame!", True, BLACK)
         instructions2 = self.font.render("Use the arrow keys to move the blue square.", True, BLACK)
         instructions3 = self.font.render("Get to the green square to pass the level.", True, BLACK)
