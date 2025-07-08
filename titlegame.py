@@ -231,6 +231,9 @@ class Game:
         self.title_font = pygame.font.SysFont(None, 48)
         self.collisions = 0
         self.start_time = pygame.time.get_ticks()  # In milliseconds
+        #background image
+        self.background = pygame.image.load("media/concretebasefromabove.jpg").convert()
+        self.background = pygame.transform.scale(self.background, (WIDTH, HEIGHT))
         # Initial maze and game elements
         self.generate_new_maze()
 
@@ -289,16 +292,16 @@ class Game:
         WIN.fill(WHITE)
         title = self.title_font.render("Reflex Driving", True, BLACK)
         instructions1 = self.font.render("Test your reflexes with this pygame!", True, BLACK)
-        instructions2 = self.font.render("Use the arrow keys to move the blue square.", True, BLACK)
+        instructions2 = self.font.render("Use the arrow keys to move the car.", True, BLACK)
         instructions3 = self.font.render("Get to the green square to pass the level.", True, BLACK)
         instructions4 = self.font.render("You need to complete three levels to win.", True, BLACK)
         start_msg = self.font.render("Press any key to continue...", True, BLUE)
 
         WIN.blit(title, (WIDTH // 2 - title.get_width() // 2, 80))
-        WIN.blit(instructions1, (WIDTH // 2 - instructions1.get_width() // 2, 125))
-        WIN.blit(instructions2, (WIDTH // 2 - instructions2.get_width() // 2, 160))
-        WIN.blit(instructions3, (WIDTH // 2 - instructions3.get_width() // 2, 200))
-        WIN.blit(instructions4, (WIDTH // 2 - instructions4.get_width() // 2, 240))
+        WIN.blit(instructions1, (WIDTH // 2 - instructions1.get_width() // 2, 130))
+        WIN.blit(instructions2, (WIDTH // 2 - instructions2.get_width() // 2, 180))
+        WIN.blit(instructions3, (WIDTH // 2 - instructions3.get_width() // 2, 220))
+        WIN.blit(instructions4, (WIDTH // 2 - instructions4.get_width() // 2, 260))
         WIN.blit(start_msg, (WIDTH // 2 - start_msg.get_width() // 2, 320))
 
         pygame.display.update()
@@ -345,7 +348,8 @@ class Game:
 
         while self.running:
             self.clock.tick(60)
-            WIN.fill(WHITE)
+            #add of background image
+            WIN.blit(self.background, (0, 0))
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

@@ -19,3 +19,12 @@ pip install -r requirements.txt
 I tried to keep it simple, so you just need to use one Python file!
 ```
 python titlegame.py
+```
+Media copyright:
+
+Concrete background: Creator: Altayb 
+| 
+Image property: Getty Images
+Copyright: Altayb
+
+Car from above: Pngtree
