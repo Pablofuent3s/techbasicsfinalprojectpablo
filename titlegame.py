@@ -55,8 +55,10 @@ class Player:
 
     def __init__(self, x, y, size):
         self.rect = pygame.Rect(x, y, size, size)
-        # Player speed, adjusted to fit maze scale
         self.speed = 2
+        self.image = pygame.image.load("media/littlecarfromabove.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (25, 25))
+        self.direction = 'UP'  # Default facing direction
 
     def move(self, keys, walls, game):
         """
@@ -65,10 +67,18 @@ class Player:
         This prevents the player from "sticking" to walls.
         """
         dx, dy = 0, 0
-        if keys[pygame.K_UP]: dy = -self.speed
-        if keys[pygame.K_DOWN]: dy = self.speed
-        if keys[pygame.K_LEFT]: dx = -self.speed
-        if keys[pygame.K_RIGHT]: dx = self.speed
+        if keys[pygame.K_UP]:
+            dy = -self.speed
+            self.direction = 'UP'
+        elif keys[pygame.K_DOWN]:
+            dy = self.speed
+            self.direction = 'DOWN'
+        elif keys[pygame.K_LEFT]:
+            dx = -self.speed
+            self.direction = 'LEFT'
+        elif keys[pygame.K_RIGHT]:
+            dx = self.speed
+            self.direction = 'RIGHT'
 
         # Store the original position before attempting movement
         original_x, original_y = self.rect.x, self.rect.y
@@ -93,7 +103,21 @@ class Player:
 
     def draw(self, surface):
         """Draws the player on the given surface."""
-        pygame.draw.rect(surface, BLUE, self.rect)
+        # Choose angle based on direction
+        angle = 0
+        if self.direction == 'UP':
+            angle = 0
+        elif self.direction == 'RIGHT':
+            angle = -90
+        elif self.direction == 'DOWN':
+            angle = 180
+        elif self.direction == 'LEFT':
+            angle = 90
+
+        # Rotate original image (not already-rotated one)
+        rotated_image = pygame.transform.rotate(self.image, angle)
+        rotated_rect = rotated_image.get_rect(center=self.rect.center)
+        surface.blit(rotated_image, rotated_rect.topleft)
 
 
 class Goal:
