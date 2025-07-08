@@ -235,41 +235,39 @@ class Game:
         self.generate_new_maze()
 
     def convert_grid_to_pygame_walls(self, grid):
-        """
-        Converts the logical maze grid (composed of Cell objects) into a list
-        of concrete Pygame Wall objects that can be drawn on the screen.
-        This includes both the internal maze walls and the outer boundary of the game window.
-        """
-        pygame_walls = []
+        """Converts the logical maze grid into clean, non-overlapping Pygame walls."""
+        walls = []
 
-        # Add the outer border walls for the entire game window
-        pygame_walls.append(Wall(0, 0, WIDTH, WALL_THICKNESS))  # Top border
-        pygame_walls.append(Wall(0, HEIGHT - WALL_THICKNESS, WIDTH, WALL_THICKNESS))  # Bottom border
-        pygame_walls.append(Wall(0, 0, WALL_THICKNESS, HEIGHT))  # Left border
-        pygame_walls.append(Wall(WIDTH - WALL_THICKNESS, 0, WALL_THICKNESS, HEIGHT))  # Right border
+        # Border walls (frame)
+        walls.append(Wall(0, 0, WIDTH, WALL_THICKNESS))  # Top
+        walls.append(Wall(0, HEIGHT - WALL_THICKNESS, WIDTH, WALL_THICKNESS))  # Bottom
+        walls.append(Wall(0, 0, WALL_THICKNESS, HEIGHT))  # Left
+        walls.append(Wall(WIDTH - WALL_THICKNESS, 0, WALL_THICKNESS, HEIGHT))  # Right
 
         for y, row in enumerate(grid):
             for x, cell in enumerate(row):
-                cell_x = x * CELL_SIZE
-                cell_y = y * CELL_SIZE
+                px = x * CELL_SIZE
+                py = y * CELL_SIZE
 
-                if cell.walls['E']:
-                    pygame_walls.append(Wall(
-                        cell_x + CELL_SIZE - WALL_THICKNESS,
-                        cell_y,
-                        WALL_THICKNESS,
-                        CELL_SIZE + WALL_THICKNESS
-                    ))
-
+                # South wall (draw only if last row or cell has bottom wall)
                 if cell.walls['S']:
-                    pygame_walls.append(Wall(
-                        cell_x,
-                        cell_y + CELL_SIZE - WALL_THICKNESS,
-                        CELL_SIZE + WALL_THICKNESS,
+                    walls.append(Wall(
+                        px,
+                        py + CELL_SIZE - WALL_THICKNESS,
+                        CELL_SIZE,
                         WALL_THICKNESS
                     ))
 
-        return pygame_walls
+                # East wall (draw only if last column or cell has right wall)
+                if cell.walls['E']:
+                    walls.append(Wall(
+                        px + CELL_SIZE - WALL_THICKNESS,
+                        py,
+                        WALL_THICKNESS,
+                        CELL_SIZE
+                    ))
+
+        return walls
 
     def generate_new_maze(self):
         """Generates a new maze and updates walls, player, and goal."""
