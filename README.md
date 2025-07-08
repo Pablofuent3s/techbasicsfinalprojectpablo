@@ -9,6 +9,8 @@ Use the keys up, down, left and right to get the car to meet the green cube!
 
 This is a kind of simulation when you have your introductory test for your driving license, when they test your reflex response when you detect a collision.
 #### Installation
+Duplicate this github repository to your local machine.
+
 
 Install required Python Version:
 ```
