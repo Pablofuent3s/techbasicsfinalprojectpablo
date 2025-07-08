@@ -2,7 +2,7 @@
 ## Pablo Fuentes´ Tech Basics 1 Final Project github repository
 This is a keyboard pygame that I wanted to improve from the assignment on week 9.
 
-Title: Reflex Drive. 
+Title: Reflex Driving. 
 
 Use the keys up, down, left and right to get the car to meet the green cube!
 
