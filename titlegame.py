@@ -372,12 +372,7 @@ class Game:
                     self.generate_new_maze()
                 else:
                     self.show_victory_screen()
-            # Display collision count and timer
-            elapsed_time = (pygame.time.get_ticks() - self.start_time) // 1000  # in seconds
-            timer_text = self.font.render(f"Time: {elapsed_time}s", True, BLACK)
-            collision_text = self.font.render(f"Collision time: {self.collisions} ms", True, BLACK)
-            WIN.blit(timer_text, (10, 10))
-            WIN.blit(collision_text, (10, 40))
+
             pygame.display.update()
 
         while True:
